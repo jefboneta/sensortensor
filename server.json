@@ -1,10 +1,12 @@
+
+
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
   "name": "io.github.jefboneta/sensortensor",
-  "description": "Documentation-search MCP server with a feedback loop that reveals gaps in your docs.",
+  "description": "Search Pi developer API documentation. Agent feedback helps identify documentation gaps.",
   "version": "1.0.0",
   "repository": {
-    "url": "https://github.com/jefboneta/sensortensor-mcp",
+    "url": "https://github.com/jefboneta/sensortensor",
     "source": "github"
   },
   "packages": [
@@ -13,18 +15,35 @@
       "identifier": "sensortensor-mcp",
       "version": "1.0.0",
       "runtime_hint": "uvx",
-      "transport": { "type": "stdio" },
+      "transport": {
+        "type": "stdio"
+      },
       "environment_variables": [
         {
           "name": "SENSORTENSOR_BASE_URL",
-          "description": "Base URL of your documentation-search API (must expose /health, /openapi.json and /search).",
+          "description": "Base URL of the Pi documentation API. It must expose /health, /openapi.json and /search. Example: https://api.sensortensor.world",
           "is_required": true
         },
         {
           "name": "SENSORTENSOR_API_KEY",
-          "description": "Optional Bearer token if your API requires authentication.",
+          "description": "Optional bearer token for API endpoints that require authentication, including shared feedback endpoints.",
           "is_required": false,
           "is_secret": true
+        },
+        {
+          "name": "SENSORTENSOR_DATA_DIR",
+          "description": "Directory for local feedback logs. Defaults to ./sensortensor_data.",
+          "is_required": false
+        },
+        {
+          "name": "SENSORTENSOR_AGENT_ID",
+          "description": "Optional identifier for this agent in shared knowledge-gap reports.",
+          "is_required": false
+        },
+        {
+          "name": "SENSORTENSOR_SHARE",
+          "description": "Sharing is disabled by default. Set to 1 to opt into sharing searches and feedback with the central API.",
+          "is_required": false
         }
       ]
     }

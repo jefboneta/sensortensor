@@ -1,0 +1,32 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "name": "io.github.jefboneta/sensortensor",
+  "description": "Documentation-search MCP server with a feedback loop that reveals gaps in your docs.",
+  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/jefboneta/sensortensor-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registry_type": "pypi",
+      "identifier": "sensortensor-mcp",
+      "version": "1.0.0",
+      "runtime_hint": "uvx",
+      "transport": { "type": "stdio" },
+      "environment_variables": [
+        {
+          "name": "SENSORTENSOR_BASE_URL",
+          "description": "Base URL of your documentation-search API (must expose /health, /openapi.json and /search).",
+          "is_required": true
+        },
+        {
+          "name": "SENSORTENSOR_API_KEY",
+          "description": "Optional Bearer token if your API requires authentication.",
+          "is_required": false,
+          "is_secret": true
+        }
+      ]
+    }
+  ]
+}

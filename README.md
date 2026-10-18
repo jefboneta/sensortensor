@@ -1,6 +1,6 @@
 <!-- mcp-name: io.github.jefboneta/sensortensor -->
 # sensortensor-mcp
-
+for pi network development and the future of pi a agent development self inproving oracle system kind
 An MCP server that lets agents search your API documentation, and **learns from how they use it**.
 
 Every search is logged. Agents rate the results. `list_knowledge_gaps` turns that into a ranked list of

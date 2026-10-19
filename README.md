@@ -1,6 +1,7 @@
 <!-- mcp-name: io.github.jefboneta/sensortensor -->
 # sensortensor-mcp
-
+## Install
+pip install sensortensor-mcp
 An MCP server that gives AI agents searchable **API documentation for Pi development**
 (for example, how Pi payments work), and **learns from how agents use it**.
 

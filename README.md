@@ -108,3 +108,4 @@ Then run `ollmcp --servers-json servers.json --model llama3.1:8b` (check `ollmcp
 ## License
 
 MIT
+<!-- mcp-name: io.github.jefboneta/sensortensor --> 

@@ -23,6 +23,7 @@ import asyncio
 import json
 import os
 import re
+import sys
 import time
 import uuid
 from collections import defaultdict
@@ -46,6 +47,13 @@ MIN_Q, MAX_Q = 2, 300   # the API requires 2..300 characters
 
 mcp = FastMCP("sensortensor")
 _schema_cache: dict[str, Any] | None = None
+
+if SHARE and not API_KEY:
+    print(
+        "[sensortensor] Warning: SENSORTENSOR_SHARE=1 but SENSORTENSOR_API_KEY is missing. "
+        "Shared endpoints may return 401/403 and central telemetry may remain zero.",
+        file=sys.stderr,
+    )
 
 
 class ApiError(Exception):
@@ -229,12 +237,18 @@ async def search_documents(q: str, limit: int = 3) -> dict:
         return {"error": str(e)}
     query_id = uuid.uuid4().hex[:12]
     n_results = _count(data)
-    _log({"type": "search", "id": query_id, "q": q, "n_results": n_results})
+    _log({"type": "search", "id": query_id, "q": q, "n_results": n_results, "agent_id": AGENT_ID})
     central = await _share("/search-events", {
         "query_id": query_id, "query": q, "agent_id": AGENT_ID,
         "n_results": min(n_results, 1000)})
-    return {"untrusted_content": True, "query_id": query_id, "query": q,
-            "central_logged": central["synced"], "results": data}
+    return {
+        "untrusted_content": True,
+        "query_id": query_id,
+        "query": q,
+        "central_logged": central["synced"],
+        "central_share": central,
+        "results": data,
+    }
 
 
 @mcp.tool()
@@ -284,7 +298,7 @@ async def submit_feedback(query_id: str, helpful: bool, note: str = "") -> dict:
     if search is None:
         return {"error": "Unknown query_id. Use the query_id returned by a search."}
     note = note[:500]
-    _log({"type": "feedback", "id": query_id, "helpful": helpful, "note": note})
+    _log({"type": "feedback", "id": query_id, "helpful": helpful, "note": note, "agent_id": AGENT_ID})
     central = await _share("/feedback", {
         "query_id": query_id, "query": search["q"][:MAX_Q], "helpful": helpful,
         "note": note, "agent_id": AGENT_ID, "n_results": min(search["n_results"], 1000)})

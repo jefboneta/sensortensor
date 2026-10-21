@@ -1,10 +1,5 @@
 name: Publish
-- run: pip install build && python -m build
-- uses: pypa/gh-action-pypi-publish@release/v1
-  with:
-    user: __token__
-    password: ${{ secrets.PYPI_API_TOKEN }}
-# Push a tag like v1.0.0 to release. Keep the tag, pyproject.toml and server.json versions identical.
+
 on:
   push:
     tags: ["v*"]
@@ -14,7 +9,6 @@ jobs:
   pypi:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write   # PyPI trusted publishing
       contents: read
     steps:
       - uses: actions/checkout@v4
@@ -40,12 +34,15 @@ jobs:
           ./network-activity-insights.ps1 -BaseUrl "$env:SENSORTENSOR_BASE_URL" -ApiKey "$env:SENSORTENSOR_API_KEY"
       - run: pip install build && python -m build
       - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
 
   mcp-registry:
     needs: pypi
     runs-on: ubuntu-latest
     permissions:
-      id-token: write   # GitHub OIDC login to the MCP registry
+      id-token: write
       contents: read
     steps:
       - uses: actions/checkout@v4

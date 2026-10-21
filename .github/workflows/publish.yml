@@ -7,11 +7,10 @@ on:
 
 jobs:
   pypi:
-  runs-on: ubuntu-latest
-  permissions:
-    id-token: write
-    contents: read
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

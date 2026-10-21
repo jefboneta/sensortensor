@@ -1,5 +1,9 @@
 name: Publish
-
+- run: pip install build && python -m build
+- uses: pypa/gh-action-pypi-publish@release/v1
+  with:
+    user: __token__
+    password: ${{ secrets.PYPI_API_TOKEN }}
 # Push a tag like v1.0.0 to release. Keep the tag, pyproject.toml and server.json versions identical.
 on:
   push:

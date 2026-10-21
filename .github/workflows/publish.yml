@@ -19,7 +19,6 @@ jobs:
         with:
           python-version: "3.12"
       - name: Telemetry smoke check
-        if: ${{ secrets.SENSORTENSOR_API_KEY != '' }}
         shell: pwsh
         env:
           SENSORTENSOR_BASE_URL: ${{ secrets.SENSORTENSOR_BASE_URL }}
@@ -27,6 +26,13 @@ jobs:
           SENSORTENSOR_AGENT_ID: ${{ secrets.SENSORTENSOR_AGENT_ID }}
           SENSORTENSOR_SHARE: ${{ secrets.SENSORTENSOR_SHARE }}
         run: |
+          if ([string]::IsNullOrWhiteSpace("$env:SENSORTENSOR_API_KEY")) {
+            Write-Host "SENSORTENSOR_API_KEY is not set. Skipping telemetry smoke check."
+            exit 0
+          }
+          if ([string]::IsNullOrWhiteSpace("$env:SENSORTENSOR_BASE_URL")) {
+            $env:SENSORTENSOR_BASE_URL = "https://api.sensortensor.world"
+          }
           ./telemetry-smoke-test.ps1 -BaseUrl "$env:SENSORTENSOR_BASE_URL" -ApiKey "$env:SENSORTENSOR_API_KEY" -AgentId "$env:SENSORTENSOR_AGENT_ID" -Query "github-actions-smoke"
           ./network-activity-insights.ps1 -BaseUrl "$env:SENSORTENSOR_BASE_URL" -ApiKey "$env:SENSORTENSOR_API_KEY"
       - run: pip install build && python -m build

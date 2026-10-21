@@ -4,6 +4,7 @@ name: Publish
 on:
   push:
     tags: ["v*"]
+  workflow_dispatch:
 
 jobs:
   pypi:
@@ -17,6 +18,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Telemetry smoke check
+        if: ${{ secrets.SENSORTENSOR_API_KEY != '' }}
+        shell: pwsh
+        env:
+          SENSORTENSOR_BASE_URL: ${{ secrets.SENSORTENSOR_BASE_URL }}
+          SENSORTENSOR_API_KEY: ${{ secrets.SENSORTENSOR_API_KEY }}
+          SENSORTENSOR_AGENT_ID: ${{ secrets.SENSORTENSOR_AGENT_ID }}
+          SENSORTENSOR_SHARE: ${{ secrets.SENSORTENSOR_SHARE }}
+        run: |
+          ./telemetry-smoke-test.ps1 -BaseUrl "$env:SENSORTENSOR_BASE_URL" -ApiKey "$env:SENSORTENSOR_API_KEY" -AgentId "$env:SENSORTENSOR_AGENT_ID" -Query "github-actions-smoke"
+          ./network-activity-insights.ps1 -BaseUrl "$env:SENSORTENSOR_BASE_URL" -ApiKey "$env:SENSORTENSOR_API_KEY"
       - run: pip install build && python -m build
       - uses: pypa/gh-action-pypi-publish@release/v1
 

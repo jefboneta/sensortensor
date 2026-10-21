@@ -1,8 +1,10 @@
+
 name: Publish
 
 on:
   push:
-    tags: ["v*"]
+    tags:
+      - "v*"
   workflow_dispatch:
 
 jobs:
@@ -11,11 +13,21 @@ jobs:
     permissions:
       id-token: write
       contents: read
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+
       - name: Telemetry smoke check
         shell: pwsh
         env:
@@ -24,20 +36,35 @@ jobs:
           SENSORTENSOR_AGENT_ID: ${{ secrets.SENSORTENSOR_AGENT_ID }}
           SENSORTENSOR_SHARE: ${{ secrets.SENSORTENSOR_SHARE }}
         run: |
-          if ([string]::IsNullOrWhiteSpace("$env:SENSORTENSOR_API_KEY")) {
-            Write-Host "SENSORTENSOR_API_KEY is not set. Skipping telemetry smoke check."
+          if ([string]::IsNullOrWhiteSpace($env:SENSORTENSOR_API_KEY)) {
+            Write-Host "API key not configured; skipping telemetry check."
             exit 0
           }
-          if ([string]::IsNullOrWhiteSpace("$env:SENSORTENSOR_BASE_URL")) {
+
+          if ([string]::IsNullOrWhiteSpace($env:SENSORTENSOR_BASE_URL)) {
             $env:SENSORTENSOR_BASE_URL = "https://api.sensortensor.world"
           }
-          ./telemetry-smoke-test.ps1 -BaseUrl "$env:SENSORTENSOR_BASE_URL" -ApiKey "$env:SENSORTENSOR_API_KEY" -AgentId "$env:SENSORTENSOR_AGENT_ID" -Query "github-actions-smoke"
-          ./network-activity-insights.ps1 -BaseUrl "$env:SENSORTENSOR_BASE_URL" -ApiKey "$env:SENSORTENSOR_API_KEY"
-      - run: pip install build && python -m build
-      - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+
+          ./telemetry-smoke-test.ps1 `
+            -BaseUrl $env:SENSORTENSOR_BASE_URL `
+            -ApiKey $env:SENSORTENSOR_API_KEY `
+            -AgentId $env:SENSORTENSOR_AGENT_ID `
+            -Query "github-actions-smoke"
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Telemetry smoke test failed."
+          }
+
+          ./network-activity-insights.ps1 `
+            -BaseUrl $env:SENSORTENSOR_BASE_URL `
+            -ApiKey $env:SENSORTENSOR_API_KEY
+
+          if ($LASTEXITCODE -ne 0) {
+            throw "Network activity insights check failed."
+          }
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
 
   mcp-registry:
     needs: pypi
@@ -45,11 +72,17 @@ jobs:
     permissions:
       id-token: write
       contents: read
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Install mcp-publisher
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install MCP Publisher
         run: |
-          curl -L "https://github.com/modelcontextprotocol/registry/releases/download/v1.0.0/mcp-publisher_1.0.0_linux_amd64.tar.gz" | tar xz mcp-publisher
+          curl -fsSL \
+            "https://github.com/modelcontextprotocol/registry/releases/download/v1.0.0/mcp-publisher_1.0.0_linux_amd64.tar.gz" \
+            | tar xz mcp-publisher
+
       - name: Publish to MCP Registry
         run: |
           ./mcp-publisher login github-oidc

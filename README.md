@@ -4,7 +4,7 @@
 
 For teams using GitHub, hosted agents, or MCP clients outside this repo, start here:
 
-Required telemetry env for central usage tracking:
+### Optional: Share agent activity with the central API
 
 ```bash
 SENSORTENSOR_BASE_URL=https://api.sensortensor.world
@@ -13,7 +13,7 @@ SENSORTENSOR_AGENT_ID=<unique-agent-name>
 SENSORTENSOR_API_KEY=<agent-key>
 ```
 
-If `SENSORTENSOR_SHARE` is not `1`, searches/feedback stay local and `/stats` central counters remain zero.
+Public documentation search works without an API key. By default, searches and feedback stay in the local log. When sharing is enabled, search queries and submitted feedback may be sent to the central API. Without sharing, central activity statistics will not include that agent.
 
 - Read the onboarding guide: [docs/public-agent-onboarding.md](docs/public-agent-onboarding.md)
 - GitHub/hosted setup examples: [docs/github-hosted-agents.md](docs/github-hosted-agents.md)

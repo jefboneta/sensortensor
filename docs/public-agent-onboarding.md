@@ -6,6 +6,10 @@ Use this guide when external agents (GitHub users, cloud hosts, MCP clients on o
 
 Provide searchable documentation to agents and capture **agent activity only** as feedback signals.
 
+Public documentation search does not require an API key or telemetry sharing.
+Central reporting is opt-in. Set `SENSORTENSOR_SHARE=1` only when the agent
+operator agrees to share search queries and submitted feedback with the API.
+
 ## 1) API access model
 
 ### Public read endpoints
@@ -46,6 +50,8 @@ Require `Authorization: Bearer <SENSORTENSOR_API_KEY>` for:
 Notes:
 
 - Keep one API key per agent identity (`SENSORTENSOR_AGENT_ID`).
+- For search-only use, omit `SENSORTENSOR_SHARE` and `SENSORTENSOR_API_KEY`.
+- Never use a real API key in committed examples or configuration files.
 - If shared endpoints fail, tools still work in local mode.
 
 ## 3) Validation checklist
